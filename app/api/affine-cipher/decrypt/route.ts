@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const cleanText = (text: string) => {
+  text = text.toLowerCase();
+  return text.replace(/[^a-zA-Z]/g, "");
+};
+
 const modInverse = (a: number, m: number): number => {
   // Calculate the modular inverse of 'a' modulo 'm'
   a = a % m;
@@ -16,11 +21,14 @@ const affineDecode = (text: string, a: number, b: number): string => {
   let decodedText = "";
   const aInverse = modInverse(a, m);
 
-  for (let i = 0; i < text.length; i++) {
-    let char = text[i];
+  // Clean the text
+  const cleanedText = cleanText(text);
+
+  for (let i = 0; i < cleanedText.length; i++) {
+    let char = cleanedText[i];
 
     if (char.match(/[a-z]/i)) {
-      let code = text.charCodeAt(i);
+      let code = cleanedText.charCodeAt(i);
       let decodedChar = "";
 
       if (code >= 65 && code <= 90) {
@@ -47,7 +55,6 @@ const affineDecode = (text: string, a: number, b: number): string => {
 export async function POST(req: NextRequest) {
   const requestBody = await req.json();
   const { text, keyA, keyB } = requestBody;
-  console.log("WOY", text, keyA, keyB);
 
   if (!text || keyA === undefined || keyB === undefined) {
     return new NextResponse(JSON.stringify({ error: "Missing text or keys" }), {
@@ -57,7 +64,6 @@ export async function POST(req: NextRequest) {
 
   const a = parseInt(keyA, 10);
   const b = parseInt(keyB, 10);
-  console.log(a, b);
 
   if (isNaN(a) || isNaN(b) || a <= 0 || b < 0) {
     return new NextResponse(JSON.stringify({ error: "Invalid keys" }), {
@@ -66,5 +72,7 @@ export async function POST(req: NextRequest) {
   }
 
   const decodedText = affineDecode(text, a, b);
-  return new NextResponse(JSON.stringify({ data: decodedText }), { status: 200 });
+  return new NextResponse(JSON.stringify({ data: decodedText }), {
+    status: 200,
+  });
 }

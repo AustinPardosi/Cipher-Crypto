@@ -1,15 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const cleanText = (text: string) => {
+  text = text.toLowerCase();
+  return text.replace(/[^a-zA-Z]/g, "");
+};
+
 const affineEncode = (text: string, a: number, b: number) => {
   // Implementation of Affine Cipher encryption
   const m = 26;
   let encryptedText = "";
 
-  for (let i = 0; i < text.length; i++) {
-    let char = text[i];
+  // Clean the text
+  const cleanedText = cleanText(text);
+
+  for (let i = 0; i < cleanedText.length; i++) {
+    let char = cleanedText[i];
 
     if (char.match(/[a-z]/i)) {
-      let code = text.charCodeAt(i);
+      let code = cleanedText.charCodeAt(i);
 
       if (code >= 65 && code <= 90) {
         // Uppercase
