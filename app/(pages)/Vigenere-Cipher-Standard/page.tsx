@@ -71,21 +71,21 @@ const VigenereCipherStandard = () => {
         setResult(data.data);
 
         if (inputMode === "text") {
-          if (inputText.match(/[^a-zA-Z]/g) || key.match(/[^a-zA-Z]/g)) {
+          if (inputText.match(/[^a-z]/g) || key.match(/[^a-z]/g)) {
             toast({
               variant: "destructive",
               title: "Warning",
-              description: "Text contains non-alphabetic characters. The input text or key will be formatted.",
+              description: "The input text or key will be formatted because only [a-z] characters are allowed.",
             });
             setInputText(data.plainText);
             setKey(data.key);
           }
         } else {
-          if (fileContent.match(/[^a-zA-Z]/g) || key.match(/[^a-zA-Z]/g)) {
+          if (fileContent.match(/[^a-z]/g) || key.match(/[^a-z]/g)) {
             toast({
               variant: "destructive",
               title: "Warning",
-              description: "Text contains non-alphabetic characters. The input text or key will be formatted.",
+              description: "The content file or key will be formatted because only [a-z] characters are allowed.",
             });
             setKey(data.key);
           }
@@ -110,8 +110,29 @@ const VigenereCipherStandard = () => {
 
       const data = await respone.json();
       if (respone.ok) {
-        console.log(data);
+
         setResult(data.data);
+        
+        if (inputMode === "text") {
+          if (inputText.match(/[^a-zA-Z]/g) || key.match(/[^a-zA-Z]/g)) {
+            toast({
+              variant: "destructive",
+              title: "Warning",
+              description: "Text contains non-alphabetic characters. The input text or key will be formatted.",
+            });
+            setInputText(data.plainText);
+            setKey(data.key);
+          }
+        } else {
+          if (fileContent.match(/[^a-zA-Z]/g) || key.match(/[^a-zA-Z]/g)) {
+            toast({
+              variant: "destructive",
+              title: "Warning",
+              description: "Text contains non-alphabetic characters. The input text or key will be formatted.",
+            });
+            setKey(data.key);
+          }
+        }
       } else {
         toast({ variant: "destructive", title: data.error });
       }
