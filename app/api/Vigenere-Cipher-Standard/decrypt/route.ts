@@ -5,11 +5,11 @@ const cleanText = (text: string) => {
   return text.replace(/[^a-zA-Z]/g, "");
 };
 
-
-// decrypt function of vigerene cipher
+const StringtoBase64 = (text: string) => {
+  return Buffer.from(text).toString('base64');
+}
 
 const VigereneDecrypt = (text: string, key: string) => {
-    console.log("VigereneDecrypt");
     const m = 26;
     let decryptedText = "";
     let keyIndex = 0;
@@ -44,5 +44,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
   }
 
   const decryptedText = VigereneDecrypt(text, key);
-  return NextResponse.json({ data: decryptedText }, { status: 200 });
+  decryptedText.decryptedText = StringtoBase64(decryptedText.decryptedText);
+  return NextResponse.json({ data: decryptedText.decryptedText, key: decryptedText.cleanedKey, text: decryptedText.cleanedText }, { status: 200 });
 }
