@@ -9,7 +9,7 @@ const StringtoBase64 = (text: string) => {
     return Buffer.from(text).toString('base64');
 }
 
-const VigereneEncrypt = (text: string, key: string) => {
+export const VigereneEncrypt = (text: string, key: string) => {
     const m = 26;
     let encryptedText = "";
     let keyIndex = 0;
