@@ -228,6 +228,23 @@ const HillCipher = () => {
     reader.readAsText(file);
   };
 
+  const handleCopyResult = () => {
+    navigator.clipboard.writeText(result);
+    toast({
+      variant: "success",
+      title: "Copied to clipboard",
+    });
+  }
+
+  const handleDownloadResult = () => {
+    const element = document.createElement("a");
+    const file = new Blob([result], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = "result.txt";
+    document.body.appendChild(element);
+    element.click();
+  }
+
   return (
     <main className="min-h-screen bg-[#121212] text-[#E0E0E0] p-8 font-sans">
       <div className="max-w-8xl mx-auto">
@@ -294,9 +311,8 @@ const HillCipher = () => {
             </Label>
             <div className="flex gap-4 pb-2">
               <Button
-                className={`px-4 py-2 rounded-md ${
-                  inputMode === "text" ? "bg-[#F244B5]" : "bg-gray-700"
-                }`}
+                className={`px-4 py-2 rounded-md ${inputMode === "text" ? "bg-[#F244B5]" : "bg-gray-700"
+                  }`}
                 onClick={() => {
                   setInputMode("text");
                   setInputFile("");
@@ -305,9 +321,8 @@ const HillCipher = () => {
                 Text Input
               </Button>
               <Button
-                className={`px-4 py-2 rounded-md ${
-                  inputMode === "file" ? "bg-[#F244B5]" : "bg-gray-700"
-                }`}
+                className={`px-4 py-2 rounded-md ${inputMode === "file" ? "bg-[#F244B5]" : "bg-gray-700"
+                  }`}
                 onClick={() => {
                   setInputMode("file");
                   setInputText("");
@@ -342,9 +357,8 @@ const HillCipher = () => {
                 </Label>
                 <div className="flex gap-4 pb-2">
                   <Button
-                    className={`px-4 py-2 rounded-md ${
-                      matrixMode === "manual" ? "bg-[#F244B5]" : "bg-gray-700"
-                    }`}
+                    className={`px-4 py-2 rounded-md ${matrixMode === "manual" ? "bg-[#F244B5]" : "bg-gray-700"
+                      }`}
                     onClick={() => {
                       setMatrixMode("manual");
                     }}
@@ -352,9 +366,8 @@ const HillCipher = () => {
                     Manual
                   </Button>
                   <Button
-                    className={`px-4 py-2 rounded-md ${
-                      matrixMode === "file" ? "bg-[#F244B5]" : "bg-gray-700"
-                    }`}
+                    className={`px-4 py-2 rounded-md ${matrixMode === "file" ? "bg-[#F244B5]" : "bg-gray-700"
+                      }`}
                     onClick={() => {
                       setMatrixMode("file");
                     }}
@@ -440,6 +453,20 @@ const HillCipher = () => {
                 className="w-full p-2 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
                 value={result}
               ></Textarea>
+              <div className="flex justify-start gap-4 pt-4">
+                <Button
+                  className="px-8 py-2 bg-[#F24BC6] hover:bg-[#F244B5] rounded-md"
+                  onClick={handleCopyResult}
+                >
+                  Copy
+                </Button>
+                <Button
+                  className="px-8 py-2 bg-[#F24BC6] hover:bg-[#F244B5] rounded-md"
+                  onClick={handleDownloadResult}
+                >
+                  Download as txt
+                </Button>
+              </div>
             </div>
           </div>
         </div>
