@@ -151,26 +151,48 @@ const AffineCipher = () => {
           {/* Key Information */}
           <div className="bg-gray-900 p-6 rounded-lg shadow-lg mb-6 flex-1">
             <h2 className="text-xl text-[#F244B5] mb-4">Key Formulas</h2>
-            <p className="italic mb-2">Encryption: C ≡ mP + b (mod n)</p>
             <p className="italic mb-2">
-              Decryption: P ≡ m<sup>-1</sup>(C - b) (mod n)
+              Encryption: <strong>C ≡ mP + b (mod n)</strong>
             </p>
-            <p>Key: m and b</p>
+            <p className="italic mb-2">
+              Decryption:{" "}
+              <strong>
+                P ≡ m<sup>-1</sup>(C - b) (mod n)
+              </strong>
+            </p>
+            <p>
+              Key: <strong>m</strong> and <strong>b</strong>
+            </p>
           </div>
 
           {/* Detailed Explanation */}
           <div className="bg-gray-900 p-6 rounded-lg shadow-lg mb-6 flex-1">
             <h3 className="text-xl text-[#F244B5] mb-4">Details</h3>
             <ul className="list-disc list-inside">
-              <li>n is the size of the alphabet.</li>
-              <li>m is an integer that is relatively prime to n.</li>
-              <li>b is the shift magnitude.</li>
               <li>
-                Caesar cipher is a special case of the Affine cipher with m = 1.
+                <strong>n</strong> is the size of the alphabet.
               </li>
               <li>
-                m<sup>-1</sup> is the multiplicative inverse of m (mod n),
-                ensuring m.m<sup>-1</sup> ≡ 1 (mod n).
+                <strong>m</strong> is an integer that is relatively prime to{" "}
+                <strong>n</strong>.
+              </li>
+              <li>
+                <strong>b</strong> is the shift magnitude.
+              </li>
+              <li>
+                Caesar cipher is a special case of the Affine cipher with{" "}
+                <strong>m = 1</strong>.
+              </li>
+              <li>
+                <strong>
+                  m<sup>-1</sup>
+                </strong>{" "}
+                is the multiplicative inverse of <strong>m (mod n)</strong>,
+                ensuring{" "}
+                <strong>
+                  m.m<sup>-1</sup> ≡ 1 (mod n)
+                </strong>
+                .
               </li>
             </ul>
           </div>
