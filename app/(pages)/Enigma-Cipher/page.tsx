@@ -12,12 +12,16 @@ import { ChevronLeftIcon } from "lucide-react";
 
 const EnigmaCipher = () => {
   const [inputMode, setInputMode] = useState<"text" | "file">("text");
-  const [inputText, setInputText] = useState("");
-  const [fileContent, setFileContent] = useState("");
-  const [keySubsitution, setKeyA] = useState("");
-  const [keyTransposition, setKeyB] = useState("");
-  const [result, setResult] = useState("");
-  const [isDecode, setIsDecode] = useState(false);
+  const [inputText, setInputText] = useState<string>("");
+  const [fileContent, setFileContent] = useState<string>("");
+  const [result, setResult] = useState<string>("");
+  const [isDecode, setIsDecode] = useState<boolean>(false);
+  const [rotorPositions, setRotorPositions] = useState({
+    rotor1: "",
+    rotor2: "",
+    rotor3: "",
+  });
+  const [plugboardConfig, setPlugboardConfig] = useState("");
   const { toast } = useToast();
 
   const handleFileChange = (event: any) => {
@@ -51,6 +55,20 @@ const EnigmaCipher = () => {
   };
 
   const handleRun = async () => {
+    console.log(rotorPositions);
+    console.log(inputText);
+    console.log(plugboardConfig);
+
+    // Validasi konfigurasi plugboard
+    if (!isValidPlugboardConfig(plugboardConfig)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Plugboard Configuration",
+        description: "Each letter must be unique and paired exactly once.",
+      });
+      return; // Hentikan eksekusi jika konfigurasi plugboard tidak valid
+    }
+
     const currentInputText = inputMode === "text" ? inputText : fileContent;
     if (isDecode) {
       await handleDecode(currentInputText);
@@ -60,67 +78,104 @@ const EnigmaCipher = () => {
   };
 
   // Handler to encode or decode the input
-  const handleEncode = async (currentInputText: String) => {
-    // Use the encode API route
-    // try {
-    //   const response = await fetch(`/api/affine-cipher/encrypt`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json; charset=UTF-8",
-    //     },
-    //     body: JSON.stringify({
-    //       text: currentInputText,
-    //       keySubsitution: parseInt(keySubsitution),
-    //       keyTransposition: parseInt(keyTransposition),
-    //     }),
-    //   });
-    //   const data = await response.json();
-    //   if (response.ok) {
-    //     setResult(data.data);
-    //   } else {
-    //     // Handle errors
-    //     toast({
-    //       variant: "destructive",
-    //       title: data.error,
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast({
-    //     variant: "destructive",
-    //     title: String(error),
-    //   });
-    // }
+  const handleEncode = async (currentInputText: string) => {
+    // Anggap API mengharapkan rotorPositions sebagai array posisi dan plugboardConfig sebagai string
+    const rotorPositionsArray = [
+      rotorPositions.rotor1,
+      rotorPositions.rotor2,
+      rotorPositions.rotor3,
+    ];
+
+    try {
+      const response = await fetch(`/api/enigma-cipher/encrypt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({
+          inputText: currentInputText,
+          rotorPositions: rotorPositionsArray,
+          plugboardConfig: plugboardConfig,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setResult(data.data);
+      } else {
+        // Handle errors
+        toast({
+          variant: "destructive",
+          title: "Encryption Error",
+          description:
+            data.error || "An unexpected error occurred during encryption.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Failed to connect to the encryption service.",
+      });
+    }
   };
 
   const handleDecode = async (currentInputText: String) => {
     // Use the decode API route
-    // try {
-    //   const response = await fetch(`/api/affine-cipher/decrypt`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json; charset=UTF-8",
-    //     },
-    //     body: JSON.stringify({
-    //       text: currentInputText,
-    //       keySubsitution: parseInt(keySubsitution),
-    //       keyTransposition: parseInt(keyTransposition),
-    //     }),
-    //   });
-    //   const data = await response.json();
-    //   if (response.ok) {
-    //     setResult(data.data);
-    //   } else {
-    //     toast({
-    //       variant: "destructive",
-    //       title: data.error,
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast({
-    //     variant: "destructive",
-    //     title: String(error),
-    //   });
-    // }
+    // Anggap API mengharapkan rotorPositions sebagai array posisi dan plugboardConfig sebagai string
+    const rotorPositionsArray = [
+      rotorPositions.rotor1,
+      rotorPositions.rotor2,
+      rotorPositions.rotor3,
+    ];
+
+    try {
+      const response = await fetch(`/api/enigma-cipher/decrypt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({
+          inputText: currentInputText,
+          rotorPositions: rotorPositionsArray,
+          plugboardConfig: plugboardConfig,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setResult(data.data);
+      } else {
+        // Handle errors
+        toast({
+          variant: "destructive",
+          title: "Encryption Error",
+          description:
+            data.error || "An unexpected error occurred during encryption.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Failed to connect to the encryption service.",
+      });
+    }
+  };
+
+  const isValidPlugboardConfig = (config: string): boolean => {
+    const pairs = config.split(" ").filter((pair) => pair !== "");
+    const seen = new Set<string>();
+    for (const pair of pairs) {
+      if (pair.length !== 2 || seen.has(pair[0]) || seen.has(pair[1])) {
+        return false;
+      }
+      seen.add(pair[0]);
+      seen.add(pair[1]);
+    }
+    return true;
+  };
+
+  const handlePlugboardChange = (config: string) => {
+    setPlugboardConfig(config.toUpperCase());
   };
 
   return (
@@ -263,155 +318,129 @@ const EnigmaCipher = () => {
                 />
               </div>
             )}
-            <div className="flex flex-col space-y-0">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="">
-                  <Label
-                    htmlFor="keySubsitution"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Rotor 1
-                  </Label>
-                  <p>EKMFLGDQVZNTOWYHXUSPAIBRCJ</p>
+            <div className="flex gap-32">
+              <div className="flex flex-col">
+                {/* Rotor */}
+                <div className="flex gap-8">
+                  <div className="">
+                    <Label
+                      htmlFor="rotor 1"
+                      className="block mb-2 text-pink-300"
+                    >
+                      Rotor 1
+                    </Label>
+                    <p>EKMFLGDQVZNTOWYHXUSPAIBRCJ</p>
+                  </div>
+                  <div className="">
+                    <Label htmlFor="" className="block mb-2 text-pink-300">
+                      Starting Position
+                    </Label>
+                    <Input
+                      id="rotor1"
+                      type="text"
+                      maxLength={1}
+                      className="p-2 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
+                      value={rotorPositions.rotor1}
+                      onChange={(e) =>
+                        setRotorPositions({
+                          ...rotorPositions,
+                          rotor1: e.target.value.toUpperCase(),
+                        })
+                      }
+                    />
+                  </div>
                 </div>
-
-                <div className="">
-                  <Label
-                    htmlFor="keyTransposition"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Order
-                  </Label>
-                  <Input
-                    id="keyTransposition"
-                    type="number"
-                    className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                    value={keyTransposition}
-                    onChange={(e) => setKeyB(e.target.value)}
-                  />
+                <div className="flex gap-8">
+                  <div className="">
+                    <Label
+                      htmlFor="keySubsitution"
+                      className="block mb-2 text-pink-300"
+                    >
+                      Rotor 2
+                    </Label>
+                    <p>AJDKSIRUXBLHWTMCQGZNPYFVOE</p>
+                  </div>
+                  <div className="">
+                    <Label
+                      htmlFor="keySubsitution"
+                      className="block mb-2 text-pink-300"
+                    >
+                      Starting Position
+                    </Label>
+                    <Input
+                      id="rotor2"
+                      type="text"
+                      maxLength={1}
+                      className="p-2 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
+                      value={rotorPositions.rotor2}
+                      onChange={(e) =>
+                        setRotorPositions({
+                          ...rotorPositions,
+                          rotor2: e.target.value.toUpperCase(),
+                        })
+                      }
+                    />
+                  </div>
                 </div>
-
-                <div className="">
-                  <Label
-                    htmlFor="keyTransposition"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Initialize Position
-                  </Label>
-                  <Input
-                    id="keyTransposition"
-                    type="number"
-                    className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                    value={keyTransposition}
-                    onChange={(e) => setKeyB(e.target.value)}
-                  />
+                <div className="flex gap-8">
+                  <div className="">
+                    <Label
+                      htmlFor="keySubsitution"
+                      className="block mb-2 text-pink-300"
+                    >
+                      Rotor 3
+                    </Label>
+                    <p>BDFHJLCPRTXVZNYEIWGAKMUSQO</p>
+                  </div>
+                  <div className="">
+                    <Label
+                      htmlFor="keySubsitution"
+                      className="block mb-2 text-pink-300"
+                    >
+                      Starting Position
+                    </Label>
+                    <Input
+                      id="rotor3"
+                      type="text"
+                      maxLength={1}
+                      className="p-2 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
+                      value={rotorPositions.rotor3}
+                      onChange={(e) =>
+                        setRotorPositions({
+                          ...rotorPositions,
+                          rotor3: e.target.value.toUpperCase(),
+                        })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              <div className="flex flex-col gap-8">
+                {/* Reflektor */}
                 <div className="">
-                  <Label
-                    htmlFor="keySubsitution"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Rotor 2
+                  <Label htmlFor="rotor 1" className="block mb-2 text-pink-300">
+                    Reflektor (UKW-B)
                   </Label>
-                  <p>EKMFLGDQVZNTOWYHXUSPAIBRCJ</p>
+                  <p>YRUHQSLDPXNGOKMIEBFZCWVJAT</p>
                 </div>
 
+                {/* Plugboard */}
                 <div className="">
-                  <Label
-                    htmlFor="keyTransposition"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Order
+                  <Label htmlFor="rotor 1" className="block mb-2 text-pink-300">
+                    Plugboard
                   </Label>
                   <Input
-                    id="keyTransposition"
-                    type="number"
-                    className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                    value={keyTransposition}
-                    onChange={(e) => setKeyB(e.target.value)}
-                  />
-                </div>
-
-                <div className="">
-                  <Label
-                    htmlFor="keyTransposition"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Initialize Position
-                  </Label>
-                  <Input
-                    id="keyTransposition"
-                    type="number"
-                    className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                    value={keyTransposition}
-                    onChange={(e) => setKeyB(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="">
-                  <Label
-                    htmlFor="keySubsitution"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Rotor 3
-                  </Label>
-                  <p>EKMFLGDQVZNTOWYHXUSPAIBRCJ</p>
-                </div>
-
-                <div className="">
-                  <Label
-                    htmlFor="keyTransposition"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Order
-                  </Label>
-                  <Input
-                    id="keyTransposition"
-                    type="number"
-                    className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                    value={keyTransposition}
-                    onChange={(e) => setKeyB(e.target.value)}
-                  />
-                </div>
-
-                <div className="">
-                  <Label
-                    htmlFor="keyTransposition"
-                    className="block mb-2 text-pink-300"
-                  >
-                    Initialize Position
-                  </Label>
-                  <Input
-                    id="keyTransposition"
-                    type="number"
-                    className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                    value={keyTransposition}
-                    onChange={(e) => setKeyB(e.target.value)}
+                    id="plugboardConfig"
+                    type="text"
+                    className="p-2 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
+                    value={plugboardConfig}
+                    onChange={(e) => handlePlugboardChange(e.target.value)}
                   />
                 </div>
               </div>
             </div>
-            <div className="flex gap-4 items-center">
-              <Label htmlFor="keySubsitution" className="block text-pink-300">
-                Reflektor
-              </Label>
-              <p>EKMFLGDQVZNTOWYHXUSPAIBRCJ</p>
-            </div>
-            <div className="flex gap-4 items-center">
-              <Label htmlFor="keySubsitution" className="block text-pink-300">
-                Plugboard
-              </Label>
-              <Input
-                id="keyTransposition"
-                type="text"
-                className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                value={keyTransposition}
-                onChange={(e) => setKeyB(e.target.value)}
-              />
-            </div>
+
             <div className="grid grid-cols-3 items-center w-full px-1">
               <div className="col-span-1 flex gap-4 justify-start items-center">
                 <p
