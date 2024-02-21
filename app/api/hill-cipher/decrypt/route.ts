@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-
-var Matrix = require("node-matrices");
+import * as math from "mathjs";
 
 const cleanText = (text: string): string => {
   return text.toLowerCase().replace(/[^a-z]/g, "");
 };
 
-function modInverse(a: number, m: number): number | null {
+const modInverse = (a: number, m: number): number | null => {
   a = a % m;
   for (let x = 1; x < m; x++) {
     if ((a * x) % m === 1) {
@@ -14,43 +13,69 @@ function modInverse(a: number, m: number): number | null {
     }
   }
   return null;
+};
+
+// Calculate the minor of a matrix
+function minor(matrix: number[][], i: number, j: number): number[][] {
+  return matrix
+    .filter((_, rowIndex) => rowIndex !== i)
+    .map((row) => row.filter((_, colIndex) => colIndex !== j));
 }
 
-function calculateModularInverseMatrix(
+// Calculate the determinant of a matrix
+function determinant(matrix: number[][]): number {
+  if (matrix.length === 1) return matrix[0][0];
+  if (matrix.length === 2)
+    return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+  return matrix[0].reduce(
+    (sum, element, index) =>
+      sum +
+      element *
+        (index % 2 === 0 ? 1 : -1) *
+        determinant(minor(matrix, 0, index)),
+    0
+  );
+}
+
+// Calculate the cofactor of a matrix element
+function cofactor(matrix: number[][], i: number, j: number): number {
+  return ((i + j) % 2 === 0 ? 1 : -1) * determinant(minor(matrix, i, j));
+}
+
+// Transpose a matrix
+function transpose(matrix: number[][]): number[][] {
+  return matrix[0].map((col, i) => matrix.map((row) => row[i]));
+}
+
+// Calculate the adjoint of a matrix
+function adjoint(matrix: number[][]): number[][] {
+  const adj = Array.from(Array(matrix.length), () =>
+    new Array(matrix.length).fill(0)
+  );
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix.length; j++) {
+      adj[j][i] = cofactor(matrix, i, j); // Note: cofactor is assigned to transposed position
+    }
+  }
+  return adj;
+}
+
+// Calculate the modular inverse of a matrix
+const calculateModularInverseMatrix = (
   matrixInput: number[][],
   mod: number
-): number[][] | null {
-  let matrix = new Matrix(matrixInput);
-  //   matrix = matrix.data;
-  console.log("matrix", matrix);
-  // Assuming determinant returns a number; you need to handle if not
-  let det = matrix.determinant() % 26;
-  det = ((det % mod) + mod) % mod;
-  console.log("det", det);
-  const detInv: number | null = modInverse(det, mod);
-  console.log("detInv", detInv);
+): number[][] | null => {
+  const det = determinant(matrixInput);
+  const detMod = ((det % mod) + mod) % mod;
+  const detInv: number | null = modInverse(detMod, mod);
 
   if (detInv === null) {
     throw new Error(`Matrix determinant is not invertible in modulo ${mod}`);
   }
 
-  try {
-    console.log("matrix", matrix);
-    const invMatrix = matrix.inverse();
-    console.log("invMatrix", invMatrix);
-    // Assuming map exists and works as expected; adjust if the API differs
-    return invMatrix.map((row: number[]) =>
-      row.map((value: number) => Math.round(value * detInv) % mod)
-    );
-  } catch (error) {
-    console.error("Error inverting matrix:", error);
-    return null;
-  }
-}
-
-Matrix.prototype.mod = function (this: any, mod: number): number[][] {
-  return this.map((row: number[]) =>
-    row.map((value: number) => Math.round(value) % mod)
+  const adj = adjoint(matrixInput);
+  return adj.map((row) =>
+    row.map((value) => (((value * detInv) % mod) + mod) % mod)
   );
 };
 
@@ -72,21 +97,24 @@ const hillDecode = (text: string, matrixInput: number[][]): string => {
       throw new Error("Matrix is not invertible in modulo 26");
     }
     matrixInverse = result;
-    console.log("result", matrixInverse);
   } catch (error) {
-    console.log("error", error);
     throw new Error("Matrix is not invertible in modulo 26");
   }
 
   for (let i = 0; i < textNums.length; i += matrixInput.length) {
     const block = textNums.slice(i, i + matrixInput.length);
-    const resultBlock = new Matrix([block])
-      .multiply(new Matrix(matrixInverse))
-      .mod(26)
-      .toArray()[0];
+    const resultBlock = new Array(matrixInput.length)
+      .fill(0)
+      .map(
+        (_, idx) =>
+          matrixInverse[idx].reduce(
+            (acc, curr, j) => acc + curr * (block[j] || 0),
+            0
+          ) % 26
+      );
 
     decodedText += resultBlock
-      .map((num: number) => String.fromCharCode(num + "a".charCodeAt(0)))
+      .map((num) => String.fromCharCode(num + "a".charCodeAt(0)))
       .join("");
   }
 
@@ -108,6 +136,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const decodedText = hillDecode(text, matrix);
     return NextResponse.json({ data: decodedText }, { status: 200 });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { error: "Failed to decrypt the text." },
       { status: 500 }
