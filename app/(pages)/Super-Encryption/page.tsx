@@ -14,8 +14,8 @@ const SuperEncryption = () => {
   const [inputMode, setInputMode] = useState<"text" | "file">("text");
   const [inputText, setInputText] = useState("");
   const [fileContent, setFileContent] = useState("");
-  const [keySubsitution, setKeyA] = useState("");
-  const [keyTransposition, setKeyB] = useState("");
+  const [keySubstitution, setKeySubsitution] = useState("");
+  const [keyTransposition, setKeyTransposition] = useState(0);
   const [result, setResult] = useState("");
   const [isDecode, setIsDecode] = useState(false);
   const { toast } = useToast();
@@ -62,65 +62,65 @@ const SuperEncryption = () => {
   // Handler to encode or decode the input
   const handleEncode = async (currentInputText: String) => {
     // Use the encode API route
-    // try {
-    //   const response = await fetch(`/api/affine-cipher/encrypt`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json; charset=UTF-8",
-    //     },
-    //     body: JSON.stringify({
-    //       text: currentInputText,
-    //       keySubsitution: parseInt(keySubsitution),
-    //       keyTransposition: parseInt(keyTransposition),
-    //     }),
-    //   });
-    //   const data = await response.json();
-    //   if (response.ok) {
-    //     setResult(data.data);
-    //   } else {
-    //     // Handle errors
-    //     toast({
-    //       variant: "destructive",
-    //       title: data.error,
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast({
-    //     variant: "destructive",
-    //     title: String(error),
-    //   });
-    // }
+    try {
+      const response = await fetch(`/api/super-encryption/encrypt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({
+          text: currentInputText,
+          keySubstitution: keySubstitution,
+          keyTransposition: keyTransposition,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setResult(data.data);
+      } else {
+        // Handle errors
+        toast({
+          variant: "destructive",
+          title: data.error,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: String(error),
+      });
+    }
   };
 
   const handleDecode = async (currentInputText: String) => {
     // Use the decode API route
-    // try {
-    //   const response = await fetch(`/api/affine-cipher/decrypt`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json; charset=UTF-8",
-    //     },
-    //     body: JSON.stringify({
-    //       text: currentInputText,
-    //       keySubsitution: parseInt(keySubsitution),
-    //       keyTransposition: parseInt(keyTransposition),
-    //     }),
-    //   });
-    //   const data = await response.json();
-    //   if (response.ok) {
-    //     setResult(data.data);
-    //   } else {
-    //     toast({
-    //       variant: "destructive",
-    //       title: data.error,
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast({
-    //     variant: "destructive",
-    //     title: String(error),
-    //   });
-    // }
+    try {
+      const response = await fetch(`/api/super-encryption/decrypt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({
+          text: currentInputText,
+          keySubstitution: keySubstitution,
+          keyTransposition: keyTransposition,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setResult(data.data);
+      } else {
+        toast({
+          variant: "destructive",
+          title: data.error,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: String(error),
+      });
+    }
   };
 
   return (
@@ -181,7 +181,7 @@ const SuperEncryption = () => {
         <div className="flex flex-col p-4 rounded-3xl bg-gray-800">
           <div className="py-2">
             <Label
-              htmlFor="keySubsitution"
+              htmlFor="keySubstitution"
               className="block mb-2 text-pink-300"
             >
               Input Type
@@ -232,17 +232,17 @@ const SuperEncryption = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-3">
                 <Label
-                  htmlFor="keySubsitution"
+                  htmlFor="keySubstitution"
                   className="block mb-2 text-pink-300"
                 >
                   key (substitution)
                 </Label>
                 <Input
-                  id="keySubsitution"
+                  id="keySubstitution"
                   type="text"
                   className=" p-2 mb-4 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
-                  value={keySubsitution}
-                  onChange={(e) => setKeyA(e.target.value)}
+                  value={keySubstitution}
+                  onChange={(e) => setKeySubsitution(e.target.value)}
                 />
               </div>
 
@@ -258,7 +258,7 @@ const SuperEncryption = () => {
                   type="number"
                   className=" p-2 mb-6 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
                   value={keyTransposition}
-                  onChange={(e) => setKeyB(e.target.value)}
+                  onChange={(e) => setKeyTransposition(Number(e.target.value))}
                 />
               </div>
             </div>
@@ -273,8 +273,10 @@ const SuperEncryption = () => {
                 </p>
                 <Switch
                   checked={isDecode}
-                  onCheckedChange={setIsDecode}
-                  className="border-2 border-[#D9D6CD]"
+                  onCheckedChange={(newCheckedValue) => {
+                    setIsDecode(newCheckedValue);
+                    setResult(""); // This will reset the result every time the switch is toggled
+                  }}
                 />
                 <p
                   className={

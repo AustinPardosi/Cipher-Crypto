@@ -104,8 +104,6 @@ const HillCipher = () => {
   const handleRun = async () => {
     const matrix = math.matrix(matrixValues);
     const currentInputText = inputMode === "text" ? inputText : inputFile;
-    console.log(inputMode, currentInputText);
-    console.log(matrix);
     try {
       if (isDecode) {
         await handleDecode(currentInputText, matrix.toArray() as number[][]);
@@ -124,7 +122,6 @@ const HillCipher = () => {
   // Handler to encode or decode the input
   const handleEncode = async (currentInputText: String, matrix: number[][]) => {
     // Use the encode API route
-    console.log("MASUK ENCODE");
     try {
       const response = await fetch(`/api/hill-cipher/encrypt`, {
         method: "POST",
