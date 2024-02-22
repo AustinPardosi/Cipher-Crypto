@@ -19,6 +19,10 @@ const VigenereCipherStandard = () => {
   const [isDecode, setIsDecode] = useState(false);
   const [result, setResult] = useState("");
 
+  const StringtoBase64 = (text: string) => {
+    return Buffer.from(text).toString('base64');
+  }
+
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (file) {
@@ -68,7 +72,7 @@ const VigenereCipherStandard = () => {
 
       const data = await respone.json();
       if (respone.ok) {
-        setResult(data.data);
+        setResult(StringtoBase64(data.data));
 
         if (inputMode === "text") {
           if (inputText.match(/[^a-z]/g) || key.match(/[^a-z]/g)) {
@@ -111,7 +115,8 @@ const VigenereCipherStandard = () => {
       const data = await respone.json();
       if (respone.ok) {
 
-        setResult(data.data);
+        setResult(StringtoBase64(data.data));
+        console.log(data.data);
         
         if (inputMode === "text") {
           if (inputText.match(/[^a-zA-Z]/g) || key.match(/[^a-zA-Z]/g)) {

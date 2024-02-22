@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { ChevronLeftIcon } from "lucide-react";
+import { e } from "mathjs";
+import { text } from "stream/consumers";
 
 const AffineCipher = () => {
   const [inputMode, setInputMode] = useState("text");
@@ -18,7 +20,28 @@ const AffineCipher = () => {
   const [keyB, setKeyB] = useState("");
   const [result, setResult] = useState("");
   const [isDecode, setIsDecode] = useState(false);
+  const [isKeyAInvalid, setIsKeyAInvalid] = useState(false);
+  const [isKeyANotCoprime, setIsKeyANotCoprime] = useState(false);
   const { toast } = useToast();
+
+  const StringtoBase64 = (text: string) => {
+    return Buffer.from(text).toString('base64');
+  }
+
+  const gcd = (a: number, b: number): number => {
+    while (b !== 0) {
+      const t = b;
+      b = a % b;
+      a = t;
+    }
+
+    return a;
+  }
+
+  const isCoprime = (a: number, b: number): boolean => {
+    return gcd(a, b) === 1;
+  } 
+
 
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
@@ -52,12 +75,27 @@ const AffineCipher = () => {
 
   const handleRun = async () => {
     const currentInputText = inputMode === "text" ? inputText : fileContent;
+    
+    // Check if the key is coprime with the alphabet size
+    if (parseInt(keyA) === 0) {
+      setIsKeyAInvalid(true);
+      return;
+    } else {
+      setIsKeyAInvalid(false);
+      if (!isCoprime(parseInt(keyA), inputText.length)) {
+        setIsKeyANotCoprime(true);
+      }
+    }
+
+
     if (isDecode) {
       await handleDecode(currentInputText);
     } else {
       await handleEncode(currentInputText);
     }
   };
+
+  
 
   // Handler to encode or decode the input
   const handleEncode = async (currentInputText: String) => {
@@ -76,7 +114,7 @@ const AffineCipher = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        setResult(data.data);
+        setResult(StringtoBase64(data.data));
       } else {
         // Handle errors
         toast({
@@ -109,7 +147,7 @@ const AffineCipher = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setResult(data.data);
+        setResult(StringtoBase64(data.data));
       } else {
         toast({
           variant: "destructive",
@@ -272,9 +310,14 @@ const AffineCipher = () => {
                   id="keyA"
                   type="number"
                   className="w-full p-2 mb-4 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
+                  defaultValue={1}
                   value={keyA}
-                  onChange={(e) => setKeyA(e.target.value)}
+                  onChange={(e) => {setKeyA(e.target.value);}}
                 />
+                {isKeyAInvalid && (
+                  <p className="text-red-500">Key m cannot be 0</p>)}
+                {isKeyANotCoprime && (
+                  <p className="text-red-500">Key m must be coprime with the alphabet size (result may be invalid) </p>)}
               </div>
 
               <div className="">

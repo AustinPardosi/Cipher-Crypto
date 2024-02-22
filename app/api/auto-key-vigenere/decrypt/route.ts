@@ -5,9 +5,7 @@ const cleanText = (text: string) => {
   return text.replace(/[^a-zA-Z]/g, "");
 };
 
-const StringtoBase64 = (text: string) => {
-  return Buffer.from(text).toString('base64');
-}
+
 
 const AutoKeyVigereneDecrypt = (text: string, key: string) => {
   console.log("Masukkk")
@@ -15,20 +13,28 @@ const AutoKeyVigereneDecrypt = (text: string, key: string) => {
   let encryptedText = "";
   let keyIndex = 0;
 
-  let cleanedPlainText = cleanText(text);
+  let cleanedCipherText = cleanText(text);
   let cleanKey = cleanText(key);
-  let cleanedKey = cleanKey + cleanedPlainText.substring(0, cleanedPlainText.length - cleanKey.length);
+
+  /**
+   * Hanya sebagai tambahan, seolah penagaanan "catch" jika key lebih pendek dari plaintext
+   * Karena kalau key.length == ciperText.length, maka tidak perlu diulang
+   */
+  let cleanedKey = cleanKey + cleanedCipherText.substring(0, cleanedCipherText.length - cleanKey.length); 
   
-  for (let i = 0; i < cleanedPlainText.length; i++) {
-    let textChar = cleanedPlainText[i];
+  for (let i = 0; i < cleanedCipherText.length; i++) {
+    let textChar = cleanedCipherText[i];
     let keyChar = cleanedKey[keyIndex];
     let textCharCode = textChar.charCodeAt(0);
     let keyCharCode = keyChar.charCodeAt(0);
-    let encryptedCharCode = (textCharCode - keyCharCode) % m + 65;
+    let keyIndexChar = keyCharCode - 97;
+    let textIndexChar = textCharCode - 97;
+    
+    let encryptedCharCode = (textIndexChar - keyIndexChar + m) % m + 97;
     encryptedText += String.fromCharCode(encryptedCharCode);
     keyIndex++;
   }
-  return { encryptedText, cleanedPlainText, cleanKey };
+  return { encryptedText, cleanedCipherText, cleanKey };
 };
 
 export async function POST(req: NextRequest, res: NextResponse) {
@@ -43,6 +49,5 @@ export async function POST(req: NextRequest, res: NextResponse) {
   }
 
   const encryptedText = AutoKeyVigereneDecrypt(text, key);
-  encryptedText.encryptedText = StringtoBase64(encryptedText.encryptedText);
-  return NextResponse.json({ data: encryptedText.encryptedText, key: encryptedText.cleanKey, text: encryptedText.cleanedPlainText }, { status: 200 });
+  return NextResponse.json({ data: encryptedText.encryptedText, key: encryptedText.cleanKey, text: encryptedText.cleanedCipherText }, { status: 200 });
 }

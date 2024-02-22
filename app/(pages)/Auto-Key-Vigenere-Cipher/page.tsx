@@ -19,6 +19,10 @@ const AutoKeyVigenereChiper = () => {
   const [isDecode, setIsDecode] = useState(false);
   const [result, setResult] = useState("");
 
+  const StringtoBase64 = (text: string) => {
+    return Buffer.from(text).toString('base64');
+  }
+
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (file) {
@@ -52,6 +56,15 @@ const AutoKeyVigenereChiper = () => {
   const handleRun = async () => {
     const inputContent = inputMode === "text" ? inputText : fileContent;
     if (isDecode) {
+      // chek key length is equal to input content, if not, then give warning, clear the result
+      if (key.length < inputContent.length) {
+        toast({
+          variant: "destructive",
+          title: "Warning",
+          description: "The key is shorter than the input content. The result may not be accurate. (key will use the first n characters of the input content)",
+        });
+        setResult("");
+      }
       await handleDecrypt(inputContent);
     } else {
       await handleEncrypt(inputContent);
@@ -68,8 +81,8 @@ const AutoKeyVigenereChiper = () => {
 
       const data = await respone.json();
       if (respone.ok) {
-        setResult(data.data);
-        console.log(data);
+        setResult(StringtoBase64(data.data));
+
 
         if (inputMode === "text") {
           if (inputText.match(/[^a-z]/g) || key.match(/[^a-z]/g)) {
@@ -88,9 +101,10 @@ const AutoKeyVigenereChiper = () => {
               title: "Warning",
               description: "The content file or key will be formatted because only [a-z] characters are allowed.",
             });
-            setKey(data.key);
           }
         }
+        setKey(data.key);
+        
 
       } else {
         toast({ variant: "destructive", title: data.error });
@@ -112,7 +126,8 @@ const AutoKeyVigenereChiper = () => {
       const data = await respone.json();
       if (respone.ok) {
 
-        setResult(data.data);
+        setResult(StringtoBase64(data.data));
+
         
         if (inputMode === "text") {
           if (inputText.match(/[^a-zA-Z]/g) || key.match(/[^a-zA-Z]/g)) {
@@ -234,13 +249,18 @@ const AutoKeyVigenereChiper = () => {
             <div className="flex flex-col">
               <Label htmlFor="key" className="mb-2 text-pink-300">
                 Key
+
               </Label>
+              <p className="text-xs text-pink-200">
+                (will take the first n characters of the input content if the key is shorter than the input content)
+              </p>
               <Input
                 id="key"
                 type="text"
                 placeholder="Enter key here"
                 onChange={(e) => setKey(e.target.value)}
                 className="w-full p-2 bg-[#0B0C0D] border border-[#A6337E] rounded-md"
+                value={key}
               />
             </div>
 

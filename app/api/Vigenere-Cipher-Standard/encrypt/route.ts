@@ -5,10 +5,6 @@ const cleanText = (text: string) => {
   return text.replace(/[^a-zA-Z]/g, "");
 };
 
-const StringtoBase64 = (text: string) => {
-    return Buffer.from(text).toString('base64');
-}
-
 export const VigereneEncrypt = (text: string, key: string) => {
     const m = 26;
     let encryptedText = "";
@@ -51,6 +47,5 @@ export async function POST(req: NextRequest, res: NextResponse) {
   }
 
   const encryptedText = VigereneEncrypt(text, key);
-  encryptedText.encryptedText = StringtoBase64(encryptedText.encryptedText); 
   return NextResponse.json({ data: encryptedText.encryptedText, key: encryptedText.cleanedKey, plainText: encryptedText.cleanedText }, { status: 200 });
 }

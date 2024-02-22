@@ -5,9 +5,6 @@ const cleanText = (text: string) => {
   return text.replace(/[^a-zA-Z]/g, "");
 };
 
-const StringtoBase64 = (text: string) => {
-  return Buffer.from(text).toString('base64');
-}
 
 const AutoKeyVigereneEncrypt = (text: string, key: string) => {
   const m = 26;
@@ -23,11 +20,15 @@ const AutoKeyVigereneEncrypt = (text: string, key: string) => {
     let keyChar = cleanedKey[keyIndex];
     let textCharCode = textChar.charCodeAt(0);
     let keyCharCode = keyChar.charCodeAt(0);
-    let encryptedCharCode = (textCharCode + keyCharCode) % m + 65;
+    let keyIndexChar = keyCharCode - 97;
+    let textIndexChar = textCharCode - 97;
+
+    let encryptedCharCode = (textIndexChar + keyIndexChar) % m + 97;
+
     encryptedText += String.fromCharCode(encryptedCharCode);
     keyIndex++;
   }
-  return { encryptedText, cleanedPlainText, cleanKey };
+  return { encryptedText, cleanedPlainText, cleanedKey };
 };
 
 export async function POST(req: NextRequest, res: NextResponse) {
@@ -42,6 +43,5 @@ export async function POST(req: NextRequest, res: NextResponse) {
   }
 
   const encryptedText = AutoKeyVigereneEncrypt(text, key);
-  encryptedText.encryptedText = StringtoBase64(encryptedText.encryptedText);
-  return NextResponse.json({ data: encryptedText.encryptedText, key: encryptedText.cleanKey, plainText: encryptedText.cleanedPlainText, variant: "VIGENERE-AUTO-KEY" }, { status: 200 });
+  return NextResponse.json({ data: encryptedText.encryptedText, key: encryptedText.cleanedKey, plainText: encryptedText.cleanedPlainText, variant: "VIGENERE-AUTO-KEY" }, { status: 200 });
 }
