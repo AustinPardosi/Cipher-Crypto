@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 export const ExtendedVigenereDecrypt = (encryptedText: string, key: string) => {
-  const m = 256;
   let decryptedText = "";
   let keyIndex = 0;
 
@@ -10,23 +9,22 @@ export const ExtendedVigenereDecrypt = (encryptedText: string, key: string) => {
       let char = encryptedText[i];
 
       let charCode = encryptedText.charCodeAt(i);
-      let keyCharCode = key.charCodeAt(keyIndex % key.length);
+      let keyChar = key.charCodeAt(keyIndex % key.length); 
       
-      
+      let decryptedCharCode;
       if (charCode >= 32 && charCode <= 126) {
-          
-          let decryptedCharCode = (charCode - keyCharCode + m) % m;
-          let decryptedChar = String.fromCharCode(decryptedCharCode);
-          
-          decryptedText += decryptedChar;
+          decryptedCharCode = (charCode - 32 - (keyChar - 32) + (126 - 32 + 1)) % (126 - 32 + 1) + 32;
       } else {
-          decryptedText += char;
+          decryptedCharCode = charCode;
       }
+
+      let decryptedChar = String.fromCharCode(decryptedCharCode);
+      decryptedText += decryptedChar;
 
       keyIndex++;
   }
 
-  return {decryptedText};
+  return { decryptedText };
 };
 
 

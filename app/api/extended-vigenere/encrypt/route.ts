@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const ExtendedVigenereEncrypt = (text: string, key: string) => {
-  const m = 256;
   let encryptedText = "";
   let keyIndex = 0;
 
@@ -11,18 +10,22 @@ export const ExtendedVigenereEncrypt = (text: string, key: string) => {
       let charCode = text.charCodeAt(i);
       let keyChar = key.charCodeAt(keyIndex % key.length); 
       
+      let encryptedCharCode;
       if (charCode >= 32 && charCode <= 126) {
-          let encryptedChar = String.fromCharCode((charCode + keyChar) % m);
-          encryptedText += encryptedChar;
+          encryptedCharCode = (charCode - 32 + keyChar - 32) % (126 - 32 + 1) + 32;
       } else {
-          encryptedText += char;
+          encryptedCharCode = charCode;
       }
-      
+
+      let encryptedChar = String.fromCharCode(encryptedCharCode);
+      encryptedText += encryptedChar;
+
       keyIndex++;
   }
 
-  return {encryptedText};
+  return { encryptedText };
 };
+
 
 
 export async function POST(req: NextRequest, res: NextResponse) {
