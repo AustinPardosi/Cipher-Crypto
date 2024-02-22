@@ -5,8 +5,8 @@ const cleanText = (text: string) => {
   return text.replace(/[^a-zA-Z]/g, "");
 };
 
+// Calculate the modular inverse of 'a' modulo 'm'
 const modInverse = (a: number, m: number): number => {
-  // Calculate the modular inverse of 'a' modulo 'm'
   a = a % m;
   for (let x = 1; x < m; x++) {
     if ((a * x) % m === 1) {
@@ -17,7 +17,8 @@ const modInverse = (a: number, m: number): number => {
 };
 
 const affineDecode = (text: string, a: number, b: number): string => {
-  const m = 26; // Size of the alphabet
+  // Implementation of Affine Cipher decryption
+  const m = 26;
   let decodedText = "";
   const aInverse = modInverse(a, m);
 
