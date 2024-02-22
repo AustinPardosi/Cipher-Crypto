@@ -251,7 +251,7 @@ const EnigmaCipher = () => {
               <li>
                 <strong>Plugboard (Steckerbrett):</strong> Allows for the manual
                 swapping of letters before and after the rotors process the
-                signal, increasing the cipher's complexity.
+                signal, increasing the cipher&apos;s complexity.
               </li>
               <li>
                 <strong>Reflector (Umkehrwalze):</strong> Causes the signal to
