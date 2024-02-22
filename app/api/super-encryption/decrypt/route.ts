@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { VigereneDecrypt } from "../../Vigenere-Cipher-Standard/decrypt/route";
+import { ExtendedVigenereDecrypt as VigereneDecrypt } from "../../extended-vigenere/decrypt/route";
 
 const superDecode = (
   text: string,

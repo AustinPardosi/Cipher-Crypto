@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { VigereneEncrypt } from "../../Vigenere-Cipher-Standard/encrypt/route";
+import { ExtendedVigenereEncrypt as VigereneEncrypt } from "../../extended-vigenere/encrypt/route";
 
 const superEncode = (
   text: string,

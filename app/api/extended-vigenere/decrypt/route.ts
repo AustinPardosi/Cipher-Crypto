@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 
-const ExtendedVigenereDecrypt = (encryptedText: string, key: string) => {
+export const ExtendedVigenereDecrypt = (encryptedText: string, key: string) => {
   const m = 256;
   let decryptedText = "";
   let keyIndex = 0;
