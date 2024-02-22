@@ -6,14 +6,18 @@ export const ExtendedVigenereEncrypt = (text: string, key: string) => {
   let keyIndex = 0;
 
   for (let i = 0; i < text.length; i++) {
-      let charCode = text.charCodeAt(i);
-      let keyCharCode = key.charCodeAt(keyIndex % key.length);
+      let char = text[i];
 
+      let charCode = text.charCodeAt(i);
+      let keyChar = key.charCodeAt(keyIndex % key.length); 
       
-      let encryptedCharCode = (charCode + keyCharCode) % m;
-      let encryptedChar = String.fromCharCode(encryptedCharCode);
+      if (charCode >= 32 && charCode <= 126) {
+          let encryptedChar = String.fromCharCode((charCode + keyChar) % m);
+          encryptedText += encryptedChar;
+      } else {
+          encryptedText += char;
+      }
       
-      encryptedText += encryptedChar;
       keyIndex++;
   }
 

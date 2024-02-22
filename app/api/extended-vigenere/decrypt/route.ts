@@ -7,18 +7,29 @@ export const ExtendedVigenereDecrypt = (encryptedText: string, key: string) => {
   let keyIndex = 0;
 
   for (let i = 0; i < encryptedText.length; i++) {
-      let encryptedCharCode = encryptedText.charCodeAt(i);
-      let keyCharCode = key.charCodeAt(keyIndex % key.length);
+      let char = encryptedText[i];
 
-      let decryptedCharCode = (encryptedCharCode - keyCharCode + m) % m;
-      let decryptedChar = String.fromCharCode(decryptedCharCode);
+      let charCode = encryptedText.charCodeAt(i);
+      let keyCharCode = key.charCodeAt(keyIndex % key.length);
       
-      decryptedText += decryptedChar;
+      
+      if (charCode >= 32 && charCode <= 126) {
+          
+          let decryptedCharCode = (charCode - keyCharCode + m) % m;
+          let decryptedChar = String.fromCharCode(decryptedCharCode);
+          
+          decryptedText += decryptedChar;
+      } else {
+          decryptedText += char;
+      }
+
       keyIndex++;
   }
 
   return {decryptedText};
 };
+
+
 
 
 export async function POST(req: NextRequest, res: NextResponse) {
